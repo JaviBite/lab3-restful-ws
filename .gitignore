@@ -3,3 +3,5 @@ build/
 *.iml
 out/
 .idea/
+bin/
+.settings/

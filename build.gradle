@@ -17,6 +17,13 @@ dependencies {
     compile "org.glassfish.jersey.inject:jersey-hk2:${jersey_version}"
     compile "org.glassfish.jersey.media:jersey-media-moxy:${jersey_version}"
 
+    compile "javax:javaee-web-api:7.0"
+
+    compile "io.swagger:swagger-jaxrs:1.5.20"
+    compile "io.swagger:swagger-annotations:1.5.20"
+    compile "io.swagger:swagger-core:1.5.20"
+    compile "io.swagger:swagger-models:1.5.20"
+
     runtime "com.sun.xml.bind:jaxb-core:2.3.0"
     runtime "com.sun.xml.bind:jaxb-impl:2.3.0"
     runtime "javax.xml.bind:jaxb-api:2.3.0"
@@ -31,4 +38,36 @@ task server(type: JavaExec) {
     description = 'Start a REST endpoint'
     main = 'rest.addressbook.Server'
     classpath = sourceSets.main.runtimeClasspath
+}
+
+buildscript {
+    repositories {
+        maven { url("https://plugins.gradle.org/m2/") }
+    }
+
+    dependencies {
+        classpath("io.swagger:swagger-codegen:2.2.2")
+    }
+}
+
+import io.swagger.codegen.config.CodegenConfigurator
+import io.swagger.codegen.DefaultGenerator
+ 
+def swaggerSourceFile = 'src/main/resources/api.yaml'
+def swaggerTargetFolder = 'src/generated/java'
+ 
+task generateApi {
+  doLast {
+    def config = new CodegenConfigurator()
+    config.setInputSpec("file:///$projectDir/$swaggerSourceFile")
+    config.setOutputDir("$projectDir")
+    config.setLang('spring')
+    config.setAdditionalProperties([
+        'interfaceOnly' : 'true',
+        'apiPackage'    : 'com.dturan.api',
+        'modelPackage'  : 'com.dturan.model',
+        'sourceFolder'  : swaggerTargetFolder
+    ])
+    new DefaultGenerator().opts(config.toClientOptInput()).generate()
+  }
 }

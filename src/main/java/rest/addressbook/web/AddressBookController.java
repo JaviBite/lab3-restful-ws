@@ -18,10 +18,13 @@ import javax.ws.rs.core.UriInfo;
 import rest.addressbook.domain.AddressBook;
 import rest.addressbook.domain.Person;
 
+import io.swagger.annotations.Api;
+
 /**
  * A service that manipulates contacts in an address book.
  */
 @Path("/contacts")
+@Api(value = "Contacts", description = "REST Endpoints for Contacts Service")
 public class AddressBookController {
 
   /**
