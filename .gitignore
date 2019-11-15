@@ -3,3 +3,6 @@ build/
 *.iml
 out/
 .idea/
+.vscode/
+bin/
+.settings/
