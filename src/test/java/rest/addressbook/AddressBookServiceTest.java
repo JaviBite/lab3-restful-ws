@@ -113,6 +113,8 @@ public class AddressBookServiceTest {
 		//Not-Safe
 		assertNotEquals(ab,ab2);
 
+		ab2 = new AddressBook(ab);
+
 		//Not-Idempotent
 		response = client.target("http://localhost:8282/contacts")
 				.request(MediaType.APPLICATION_JSON)
@@ -140,7 +142,7 @@ public class AddressBookServiceTest {
 		maria.setName("Maria");
 		URI mariaURI = URI.create("http://localhost:8282/contacts/person/3");
 
-		AddressBook ab2 = new AddressBook(ab);
+		
 
 		// Create a user
 		Client client = ClientBuilder.newClient();
@@ -162,6 +164,8 @@ public class AddressBookServiceTest {
 		assertEquals(3, mariaUpdated.getId());
 		assertEquals(mariaURI, mariaUpdated.getHref());
 
+		AddressBook ab2 = new AddressBook(ab);
+
 		// Check that the new user exists
 		response = client.target("http://localhost:8282/contacts/person/3")
 				.request(MediaType.APPLICATION_JSON).get();
@@ -177,15 +181,14 @@ public class AddressBookServiceTest {
 		// complete the test to ensure that it is safe and idempotent
 		//////////////////////////////////////////////////////////////////////	
 
-		//Not-Safe
-		assertNotEquals(ab,ab2);
+		//Safe
+		assertEquals(ab,ab2);
 
-		//Not-Idempotent
-		response = client.target("http://localhost:8282/contacts")
-				.request(MediaType.APPLICATION_JSON)
-				.post(Entity.entity(juan, MediaType.APPLICATION_JSON));
+		//Idempotent
+		response = client.target("http://localhost:8282/contacts/person/3")
+				.request(MediaType.APPLICATION_JSON).get();
 
-		assertNotEquals(ab,ab2);
+		assertEquals(ab,ab2);
 	
 	}
 
@@ -264,7 +267,10 @@ public class AddressBookServiceTest {
 		assertEquals(2, juanUpdated.getId());
 		assertEquals(juanURI, juanUpdated.getHref());
 
-		AddressBook ab3 = new AddressBook(ab);
+		//Not-Safe
+		assertNotEquals(ab,ab2);
+		
+		ab2 = new AddressBook(ab);
 
 		// Verify that the update is real
 		response = client.target("http://localhost:8282/contacts/person/2")
@@ -286,17 +292,14 @@ public class AddressBookServiceTest {
 		// Verify that PUT /contacts/person/2 is well implemented by the service, i.e
 		// complete the test to ensure that it is idempotent but not safe
 		//////////////////////////////////////////////////////////////////////
-		
-		//Not-Safe
-		assertNotEquals(ab,ab2);
 
-		//Idempotent
 		response = client
 		.target("http://localhost:8282/contacts/person/2")
 		.request(MediaType.APPLICATION_JSON)
 		.put(Entity.entity(maria, MediaType.APPLICATION_JSON));
 
-		assertEquals(ab, ab3);
+		//Idempotent
+		assertEquals(ab, ab2);
 	
 	}
 
@@ -328,8 +331,6 @@ public class AddressBookServiceTest {
 				.request().delete();
 		assertEquals(404, response.getStatus());
 
-		AddressBook ab3 = new AddressBook(ab);
-
 		//////////////////////////////////////////////////////////////////////
 		// Verify that DELETE /contacts/person/2 is well implemented by the service, i.e
 		// complete the test to ensure that it is idempotent but not safe
@@ -338,12 +339,14 @@ public class AddressBookServiceTest {
 		//Not-Safe
 		assertNotEquals(ab,ab2);
 
+		ab2 = new AddressBook(ab);
+
 		//Idempotent
 		response = client
 				.target("http://localhost:8282/contacts/person/2").request()
 				.delete();
 
-		assertEquals(ab,ab3);
+		assertEquals(ab,ab2);
 
 	}
 
